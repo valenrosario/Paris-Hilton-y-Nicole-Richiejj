@@ -1,0 +1,6 @@
+{
+  "name": "The Simple Life",
+  "description": "Minimalist Y2K tribute to The Simple Life with Paris Hilton & Nicole Richie.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

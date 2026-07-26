@@ -1,0 +1,345 @@
+import React, { useState } from 'react';
+import { motion } from 'motion/react';
+import { T, useLanguage } from '../LanguageContext';
+import { Lightbox } from '../components/Lightbox';
+import { EpisodeModal } from '../components/EpisodeModal';
+
+// --- EDITABLE IMAGES (SEASONS) ---
+// Add your image URLs here for each season. Leave empty strings to show the placeholder blocks.
+const SEASON_IMAGES: Record<number, {
+  banner: { desktop: string; mobile: string };
+  poster: { desktop: string; mobile: string };
+  gallery: { desktop: string; mobile: string }[];
+}> = {
+  1: {
+    banner: { desktop: "", mobile: "" },
+    poster: { desktop: "", mobile: "" },
+    gallery: Array(6).fill({ desktop: "", mobile: "" })
+  },
+  2: {
+    banner: { desktop: "", mobile: "" },
+    poster: { desktop: "", mobile: "" },
+    gallery: Array(6).fill({ desktop: "", mobile: "" })
+  },
+  3: {
+    banner: { desktop: "", mobile: "" },
+    poster: { desktop: "", mobile: "" },
+    gallery: Array(6).fill({ desktop: "", mobile: "" })
+  },
+  4: {
+    banner: { desktop: "", mobile: "" },
+    poster: { desktop: "", mobile: "" },
+    gallery: Array(6).fill({ desktop: "", mobile: "" })
+  },
+  5: {
+    banner: { desktop: "", mobile: "" },
+    poster: { desktop: "", mobile: "" },
+    gallery: Array(6).fill({ desktop: "", mobile: "" })
+  }
+};
+
+interface SeasonProps {
+  data: {
+    id: number;
+    title: { en: string; es: string };
+    synopsis: { en: string; es: string };
+    description?: { en: string; es: string };
+    highlights?: { en: string; es: string }[];
+    episodes?: { title: { en: string; es: string }; summary: { en: string; es: string } }[];
+    family: { en: string; es: string };
+    photos: number;
+    stats?: any;
+  };
+}
+
+export const Season: React.FC<SeasonProps> = ({ data }) => {
+  const { language } = useLanguage();
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [currentPhoto, setCurrentPhoto] = useState<string>('');
+  
+  // Episode Modal State
+  const [selectedEpisode, setSelectedEpisode] = useState<{title: {en: string, es: string}, summary: {en: string, es: string}} | null>(null);
+  const [isEpisodeModalOpen, setIsEpisodeModalOpen] = useState(false);
+
+  const openLightbox = (photoTitle: string) => {
+    setCurrentPhoto(photoTitle);
+    setLightboxOpen(true);
+  };
+
+  const openEpisodeModal = (episode: {title: {en: string, es: string}, summary: {en: string, es: string}}) => {
+    setSelectedEpisode(episode);
+    setIsEpisodeModalOpen(true);
+  };
+
+  const images = SEASON_IMAGES[data.id] || SEASON_IMAGES[1];
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="w-full"
+      key={`season-${data.id}`}
+    >
+      {/* Full Width Hero Banner */}
+      <div className="relative w-full bg-neutral-900 pt-32 pb-12 overflow-hidden">
+        {/* Desktop Banner Background */}
+        <div 
+          className="hidden md:flex absolute inset-0 bg-[var(--color-accent-light)] opacity-30 flex-col items-center justify-center text-center bg-cover bg-center"
+          style={images.banner.desktop ? { backgroundImage: `url(${images.banner.desktop})`, opacity: 0.6 } : {}}
+        >
+          {!images.banner.desktop && (
+            <>
+              <span className="text-white font-black text-4xl uppercase tracking-widest opacity-50 mb-2">
+                <T en="Season Banner (PC)" es="Banner de la Temporada (PC)" />
+              </span>
+              <span className="text-white font-bold text-xs uppercase opacity-40">
+                <T en="Size: 1920x1080" es="Tamaño: 1920x1080" />
+              </span>
+            </>
+          )}
+        </div>
+
+        {/* Mobile Banner Background */}
+        <div 
+          className="flex md:hidden absolute inset-0 bg-[var(--color-accent)] opacity-30 flex-col items-center justify-center text-center bg-cover bg-center"
+          style={images.banner.mobile ? { backgroundImage: `url(${images.banner.mobile})`, opacity: 0.6 } : {}}
+        >
+          {!images.banner.mobile && (
+            <>
+              <span className="text-white font-black text-2xl uppercase tracking-widest opacity-50 mb-2">
+                <T en="Season Banner (Mobile)" es="Banner Temporada (Móvil)" />
+              </span>
+              <span className="text-white font-bold text-[10px] uppercase opacity-40">
+                <T en="Size: 1080x1920" es="Tamaño: 1080x1920" />
+              </span>
+            </>
+          )}
+        </div>
+        
+        {/* Dark Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/80 to-transparent"></div>
+
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-10 flex flex-col md:flex-row gap-8 items-end">
+           {/* Left Column: Poster */}
+          <div className="md:w-1/3 w-full max-w-[240px] mx-auto md:mx-0">
+             <div className="w-full aspect-[2/3] bg-white rounded-xl shadow-2xl border border-neutral-100/10 relative overflow-hidden group">
+               <div className="absolute inset-0 bg-[var(--color-accent)] opacity-20"></div>
+               {/* Desktop Poster */}
+               <div 
+                 className="hidden md:flex absolute inset-0 flex-col items-center justify-center z-10 p-4 text-center bg-cover bg-center"
+                 style={images.poster.desktop ? { backgroundImage: `url(${images.poster.desktop})` } : {}}
+               >
+                 {!images.poster.desktop && (
+                   <>
+                     <span className="text-[var(--color-accent)] font-black tracking-widest text-xs leading-relaxed mb-1">
+                       <T en={`Season ${data.id} Poster (PC)`} es={`Póster T${data.id} (PC)`} />
+                     </span>
+                     <span className="text-[var(--color-accent)] font-medium text-[8px] uppercase opacity-60">
+                       <T en="Size: 800x1200" es="Tamaño: 800x1200" />
+                     </span>
+                   </>
+                 )}
+               </div>
+               {/* Mobile Poster */}
+               <div 
+                 className="flex md:hidden absolute inset-0 flex-col items-center justify-center z-10 p-4 text-center bg-cover bg-center"
+                 style={images.poster.mobile ? { backgroundImage: `url(${images.poster.mobile})` } : {}}
+               >
+                 {!images.poster.mobile && (
+                   <>
+                     <span className="text-[var(--color-accent)] font-black tracking-widest text-xs leading-relaxed mb-1">
+                       <T en={`Season ${data.id} Poster (Mobile)`} es={`Póster T${data.id} (Móvil)`} />
+                     </span>
+                     <span className="text-[var(--color-accent)] font-medium text-[8px] uppercase opacity-60">
+                       <T en="Size: 800x1200" es="Tamaño: 800x1200" />
+                     </span>
+                   </>
+                 )}
+               </div>
+             </div>
+          </div>
+
+          {/* Right Column: Title */}
+          <div className="md:w-2/3 w-full pb-2 md:pb-6 text-center md:text-left">
+            <h2 className="text-5xl md:text-6xl font-black uppercase tracking-tighter text-white drop-shadow-md">
+              <T en={data.title.en} es={data.title.es} />
+            </h2>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content (White background) */}
+      <div className="w-full bg-white">
+        <div className="max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-10">
+          <div className="flex flex-col md:flex-row gap-8 mb-16">
+            {/* Left Column: Hosts & Synopsis */}
+            <div className="md:w-1/3 space-y-6">
+               <div>
+                 <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-accent)] mb-2">
+                   <T en="Hosts" es="Anfitriones" />
+                 </p>
+                 <p className="text-xl font-black uppercase text-neutral-900 mb-8">
+                    <T en={data.family.en} es={data.family.es} />
+                 </p>
+                 <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-accent)] mb-2">
+                   <T en="Synopsis" es="Sinopsis" />
+                 </p>
+                 <p className="text-sm text-neutral-600 leading-relaxed">
+                    <T en={data.synopsis.en} es={data.synopsis.es} />
+                 </p>
+               </div>
+            </div>
+
+            {/* Right Column: Description */}
+            <div className="md:w-2/3 space-y-8">
+              {data.description && (
+                <p className="text-neutral-600 text-base leading-relaxed">
+                  <T en={data.description.en} es={data.description.es} />
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Episodes List */}
+          {data.episodes && (
+            <div className="mb-16">
+          <h3 className="text-xl font-black uppercase tracking-widest text-neutral-900 mb-6 border-b border-neutral-100 pb-4">
+            <T en="Episodes" es="Episodios" />
+          </h3>
+          <div className="overflow-x-auto pb-4">
+            <div className="flex gap-4 min-w-max">
+              {data.episodes.map((episode, i) => (
+                <div 
+                  key={i} 
+                  onClick={() => openEpisodeModal(episode)}
+                  className="w-72 bg-white border border-neutral-100 p-6 rounded-2xl flex-shrink-0 hover:border-[var(--color-accent)] transition-colors group cursor-pointer shadow-sm"
+                >
+                  <h4 className="text-sm font-black uppercase text-neutral-900 mb-2 group-hover:text-[var(--color-accent)] transition-colors">
+                    <T en={episode.title.en} es={episode.title.es} />
+                  </h4>
+                  <p className="text-xs text-neutral-500 leading-relaxed line-clamp-3">
+                    <T en={episode.summary.en} es={episode.summary.es} />
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Gallery Carousel */}
+      <h3 className="text-xl font-black uppercase tracking-widest text-neutral-900 mb-6 border-b border-neutral-100 pb-4">
+        <T en="Gallery" es="Galería" />
+      </h3>
+      <div className="overflow-x-auto pb-4">
+        <div className="flex gap-4 min-w-max">
+          {Array.from({ length: data.photos }).map((_, i) => {
+            const photoTitleEn = `S${data.id}: Promo Photo ${i + 1}`;
+            const photoTitleEs = `T${data.id}: Foto Promo ${i + 1}`;
+            const currentTitle = language === 'en' ? photoTitleEn : photoTitleEs;
+            const galImg = images.gallery[i] || { desktop: "", mobile: "" };
+
+            return (
+              <motion.div 
+                key={i}
+                whileHover={{ scale: 0.98 }}
+                onClick={() => openLightbox(currentTitle)}
+                className="w-72 sm:w-80 md:w-96 aspect-video rounded-lg flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity relative overflow-hidden"
+              >
+                {/* Desktop Gallery Image */}
+                <div 
+                  className="hidden md:flex absolute inset-0 bg-[var(--color-accent-light)] flex-col items-center justify-center p-4 bg-cover bg-center"
+                  style={galImg.desktop ? { backgroundImage: `url(${galImg.desktop})` } : {}}
+                >
+                  {!galImg.desktop && (
+                    <>
+                      <div className="text-[10px] font-bold text-white uppercase text-center mb-1">
+                        <T en={`${photoTitleEn} (PC)`} es={`${photoTitleEs} (PC)`} />
+                      </div>
+                      <div className="text-[8px] font-medium text-white uppercase text-center opacity-75">
+                        <T en="Size: 1920x1080" es="Tamaño: 1920x1080" />
+                      </div>
+                    </>
+                  )}
+                </div>
+                {/* Mobile Gallery Image */}
+                <div 
+                  className="flex md:hidden absolute inset-0 bg-[var(--color-accent)] flex-col items-center justify-center p-4 bg-cover bg-center"
+                  style={galImg.mobile ? { backgroundImage: `url(${galImg.mobile})` } : {}}
+                >
+                  {!galImg.mobile && (
+                    <>
+                      <div className="text-[10px] font-bold text-white uppercase text-center mb-1">
+                        <T en={`${photoTitleEn} (Mobile)`} es={`${photoTitleEs} (Móvil)`} />
+                      </div>
+                      <div className="text-[8px] font-medium text-white uppercase text-center opacity-75">
+                        <T en="Size: 1920x1080" es="Tamaño: 1920x1080" />
+                      </div>
+                    </>
+                  )}
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Season Data */}
+      <div className="mt-16">
+        <h3 className="text-xl font-black uppercase tracking-widest text-neutral-900 mb-6 border-b border-neutral-100 pb-4">
+          <T en="Season Data" es="Datos de la Temporada" />
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-100 flex flex-col items-center justify-center text-center">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-2">
+              <T en="Year" es="Año" />
+            </span>
+            <span className="text-2xl font-black text-neutral-900">
+              {data.stats?.year || "200X"}
+            </span>
+          </div>
+          <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-100 flex flex-col items-center justify-center text-center">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-2">
+              <T en="Network" es="Cadena" />
+            </span>
+            <span className="text-xl font-black text-neutral-900">
+              {data.stats?.network || "Fox"}
+            </span>
+          </div>
+          <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-100 flex flex-col items-center justify-center text-center">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-2">
+              <T en="Episodes" es="Episodios" />
+            </span>
+            <span className="text-2xl font-black text-neutral-900">
+              {data.episodes ? data.episodes.length : 0}
+            </span>
+          </div>
+          <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-100 flex flex-col items-center justify-center text-center">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-2">
+              <T en="Location" es="Ubicación" />
+            </span>
+            <span className="text-sm font-black text-neutral-900 uppercase">
+              {data.stats?.location || <T en="Various" es="Varias" />}
+            </span>
+          </div>
+        </div>
+      </div>
+        </div>
+      </div>
+
+      <Lightbox 
+        isOpen={lightboxOpen} 
+        onClose={() => setLightboxOpen(false)} 
+        title={currentPhoto} 
+      />
+
+      <EpisodeModal 
+        isOpen={isEpisodeModalOpen}
+        onClose={() => setIsEpisodeModalOpen(false)}
+        episode={selectedEpisode}
+        seasonId={data.id}
+      />
+    </motion.div>
+  );
+};
